@@ -8,13 +8,13 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "bot.py",
             "console": "integratedTerminal",
             "env": {
                 "FT_DEVEL": "1"
             },
             "stopOnEntry": true,
-            "justMyCode": false
+            //"justMyCode": false
 
         }
     ]
