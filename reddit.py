@@ -1,5 +1,5 @@
 import sentry_sdk
-from core import reddit
+from core import reddit as bot
 from core import config
 from core import db
 
@@ -13,13 +13,7 @@ sentry_sdk.init(
 )
 
 def reddit_bot():
-	print("The FastTRAK Reddit Interface is initializing, stand by.")
-	user_agent = "FastTRAK Reddit Interface" 
-	r_api = praw.Reddit(client_id = config.CLIENT_ID, 
-						client_secret = config.CLIENT_SECRET, 
-						username = config.USERNAME, 
-						password = config.PASSWORD, 
-						user_agent = user_agent)
-    
-    print("Online with Reddit API.")
-    reddit.sub_scan(r_api)
+    print("The FastTRAK Reddit Interface is initializing, stand by.")
+    r_api = praw.Reddit(client_id = config.CLIENT_ID, client_secret = config.CLIENT_SECRET, username = config.USERNAME, password = config.PASSWORD, user_agent = user_agent)
+    print("Online with the Reddit API")
+    bot.sub_scan(r_api)
