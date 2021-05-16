@@ -5,7 +5,7 @@ from . import bot_parser
 from bot import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from ..db.first_run import models
+from bot import db
 from . import db_ops
 
 
@@ -27,13 +27,10 @@ def tabulate_votes(submission, thread_id):
     for i in all_comments:
         if bot_parser.parse_vote(i.body, i.author.name) == 1:
             aye = aye + 1
-            record_votes(i.author.id, submission, vote=1)
         elif bot_parser.parse_vote(i.body, i.author.name) == 0:
             nay = nay + 1
-            record_votes(i.author.id, submission, vote=0)
         elif bot_parser.parse_vote(i.body, i.author.name) == 2:
             abst = abst + 1
-            record_votes(i.author.id, submission, vote=2)
         elif bot_parser.parse_vote(i.body, i.author.name) == 10:
             print(" Plugins::Secure // [INFO] Ignoring Trigger.")
         else:
@@ -43,29 +40,6 @@ def tabulate_votes(submission, thread_id):
             alerts = alerts + 1
     count = [aye], [nay], [abst], [alerts]
     return count
-
-
-def record_votes(player, sub, vote):
-    bill_type = bot_parser.parse_title(sub.title)
-    bill_num = bot_parser.parse_bill_num(sub.title, bill_type)
-    user_id = db_ops.find_user(player)
-
-    bill_query = models.Bills(
-        bill_type=bill_type,
-        bill_num=bill_num
-    )
-
-    db_bill_id = s.query(bill_query).first().id
-
-    vote_create = models.Votes(
-        timestamp=datetime.datetime.utcnow().isoformat(),
-        user_id=user_id,
-        bill_id=db_bill_id,
-        thread_id=sub.id,
-        vote=vote
-    )
-
-    s.add(vote_create)
 
 
 def secure_thread(submission, count):

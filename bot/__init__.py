@@ -1,4 +1,5 @@
 from .db import first_run
+from .db import models
 from .reddit import list_mods
 from .reddit import parse_vote
 from .reddit import sub_scan

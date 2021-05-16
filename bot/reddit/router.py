@@ -12,5 +12,11 @@ def parse_verb(verb, comment, r):
     if verb == "enable":
         thread_id = comment.link_id[3:]
         submission = r.submission(id=thread_id)
-        if not submission.mod.thing.locked:
-            db_ops.create_bill(submission, thread_id)
+        status = db_ops.find_thread(thread_id)
+        if status is None:
+            db_ops.track_thread(0, submission, thread_id)
+        else:
+            db_ops.track_thread(1, submission, thread_id)
+
+
+

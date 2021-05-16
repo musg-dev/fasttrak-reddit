@@ -23,36 +23,48 @@ def parse_vote(x, y):
 
 
 def parse_title(title):
-    if re.compile("(S.)").search(title):
-        return 1
-    elif re.compile("(H.R.)").search(title):
-        return 2
-    elif re.compile("(S.Res.").search(title):
+    if re.compile("(S.Res.)").search(title):
         return 3
     elif re.compile("(H.Res.)").search(title):
         return 4
     elif re.compile("(S.Con.Res.)").search(title):
         return 5
-    elif re.compile("(H.Con.Res.").search(title):
+    elif re.compile("(H.Con.Res.)").search(title):
         return 6
     elif re.compile("(S.J.Res.)").search(title):
         return 7
     elif re.compile("(H.J.Res.)").search(title):
         return 8
+    elif re.compile("(S.)").search(title):
+        return 1
+    elif re.compile("(H.R.)").search(title):
+        return 2
     else:
         return 0
 
 
 def parse_bill_num(title, bill_type):
-    if bill_type == 3 or 4:
+    if bill_type == 3:
         raw_bill_num = title[5:8]
         bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
         return bill_num
-    if bill_type == 5 or 6:
+    if bill_type == 4:
+        raw_bill_num = title[5:8]
+        bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
+        return bill_num
+    if bill_type == 5:
         raw_bill_num = title[9:12]
         bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
         return bill_num
-    if bill_type == 7 or 8:
+    if bill_type == 6:
+        raw_bill_num = title[9:12]
+        bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
+        return bill_num
+    if bill_type == 7:
+        raw_bill_num = title[7:10]
+        bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
+        return bill_num
+    if bill_type == 8:
         raw_bill_num = title[7:10]
         bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
         return bill_num
