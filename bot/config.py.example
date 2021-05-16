@@ -1,0 +1,24 @@
+import os
+
+CLIENT_ID = ""
+CLIENT_SECRET = ""
+USERNAME = ""
+PASSWORD = ""
+USER_AGENT = "MUSGFastTRAK/0.1"
+
+SENTRY_URL = ""  # URL for Sentry Errors
+
+TRIGGER = "./FastTRAK"  # Word to get the bot's attention.
+
+MOD_SUB = "MUSGFastTRAK"  # Sub to which draw the list of authorized users.
+
+
+if os.getenv("FT_DEVEL") == "1":
+    WATCH_SUBS = "MUSGFastTRAKSandbox"
+    DATABASE_URI = 'postgresql+psycopg2://postgres:password@localhost:5432/ft_devel'
+else:
+    WATCH_SUBS = "ModelUSHouseFACom+ModelUSHouseBudgetCom+ModelUSHouseESTCom+" \
+                 "ModelUSHouseELECom+ModelUSHouseGOIII+ModelUSHouseJudicial+ModelUSHouseRulesCom+" \
+                 "ModelUSHouseIntelCom+ModelSenateJudiciCom+ModelSenateEnviroCom+ModelSenateFinanceCom+" \
+                 "ModelSenateFACom+ModelUSSenate+ModelUSHouse"
+    DATABASE_URI = 'postgresql+psycopg2://postgres:password@localhost:5432/ft_prod'

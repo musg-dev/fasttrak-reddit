@@ -1,0 +1,1 @@
+from .first_run import db_kickstart
