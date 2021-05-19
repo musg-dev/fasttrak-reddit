@@ -5,7 +5,6 @@ from . import bot_parser
 from bot import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from bot import db
 from . import db_ops
 
 
@@ -25,11 +24,19 @@ def tabulate_votes(submission, thread_id):
     submission.comments.replace_more(limit=None)
     all_comments = submission.comments.list()
     for i in all_comments:
+        if db_ops.find_user(i.author.id) == 0:
+            db_ops.track_users(0, i.author.name, i.author.id)
+        bid = db_ops.find_bill(submission)
+        tid = db_ops.find_thread(submission.id)
+        uid = db_ops.find_user(i.author.id)
         if bot_parser.parse_vote(i.body, i.author.name) == 1:
+            db_ops.create_vote(uid, bid, tid, 1)
             aye = aye + 1
         elif bot_parser.parse_vote(i.body, i.author.name) == 0:
+            db_ops.create_vote(uid, bid, tid, 0)
             nay = nay + 1
         elif bot_parser.parse_vote(i.body, i.author.name) == 2:
+            db_ops.create_vote(uid, bid, tid, 2)
             abst = abst + 1
         elif bot_parser.parse_vote(i.body, i.author.name) == 10:
             print(" Plugins::Secure // [INFO] Ignoring Trigger.")

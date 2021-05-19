@@ -3,6 +3,7 @@ from . import bot_parser
 from bot import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy import and_
 from . import models
 
 
@@ -30,21 +31,18 @@ def create_bill(sub, thr_id):
 
 def find_bill(sub):
     s = Session()
+    s.close_all()
     bill_type = bot_parser.parse_title(sub.title)
     bill_num = bot_parser.parse_bill_num(sub.title, bill_type)[0]
 
-    q = s.query(models.Bills).filter(models.Bills.bill_type == bill_type and
-                                     models.Bills.bill_number == bill_num)
-    bill_id = s.query(models.Bills.id).filter(q.exists()).scalar()
+    q = s.query(models.Bills).filter(and_(models.Bills.bill_type == bill_type,
+                                     models.Bills.bill_number == bill_num))
+    bill_id = s.query(models.Bills.id).filter(q.exists()).first().id
 
     if bill_id != 0:
         return bill_id
     else:
         return 0
-
-
-def find_bill2(thr_id):
-    
 
 
 def create_user(usr_id, usr_name):
@@ -64,9 +62,10 @@ def create_user(usr_id, usr_name):
 
 def find_user(user_api):
     s = Session()
+    s.close_all()
 
     q = s.query(models.Redditors).filter(models.Redditors.user_api == user_api)
-    user_id = s.query(models.Redditors.id).filter(q.exists()).scalar()
+    user_id = s.query(models.Redditors.id).filter(q.exists()).first().id
 
     if user_id != 0:
         return user_id
@@ -91,9 +90,9 @@ def create_thread(sub, thr_id):
 
 def find_thread(thr_id):
     s = Session()
-
+    s.close_all()
     q = s.query(models.Threads).filter(models.Threads.thread_id == thr_id)
-    thread_id = s.query(models.Threads).filter(q.exists()).scalar()
+    thread_id = s.query(models.Threads).filter(q.exists()).first().id
 
     if thread_id != 0:
         return thread_id
@@ -114,7 +113,7 @@ def create_vote(uid, bid, tid, vote):
 
     s.add(vote_full)
     s.commit()
-    s.close()
+    s.close_all()
 
 
 def track_thread(flag, sub, thr_id):
@@ -128,3 +127,10 @@ def track_thread(flag, sub, thr_id):
             return 0
 
 
+def track_users(flag, user, user_api):
+    if flag == 0:
+        create_user(user_api, user)
+    if flag == 1:
+        return find_user(user_api)
+    else:
+        return 0
