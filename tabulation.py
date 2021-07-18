@@ -1,3 +1,4 @@
+from re import sub
 import emoji
 from sentry_sdk import capture_message
 import datetime
@@ -53,9 +54,11 @@ def secure_thread(submission, count):
     abst = count[2]
     alerts = count[3]
     if alerts == [0]:
+        db_ops.update_thread(submission.id, True, True)
         submission.reply("THREAD IS SECURED! \n\n \n\n Ayes: " + str(aye) + " \n\n Nays: " + str(nay)
                          + " \n\n Abstain: " + str(abst))
     if alerts != [0]:
+        db_ops.update_thread(submission.id, True, True)
         submission.reply(emoji.emojize(":biohazard:") + " I HAVE ALERTS! CHECK SENTRY! " + emoji.emojize(":biohazard:")
                          + " \n\n \n\n \n\n \n\n THREAD IS SECURED WITH " + emoji.emojize(":biohazard:") + " "
                          + str(alerts) + " ALERTS! \n\n \n\n Ayes: " + str(aye) + " \n\n Nays: " + str(nay)

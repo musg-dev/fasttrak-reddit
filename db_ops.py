@@ -39,15 +39,17 @@ def find_bill(sub, thr_id):
     bill_num = bot_parser.parse_bill_num(sub.title, bill_type)[0]
 
     q = s.query(models.Bills).filter(and_(models.Bills.bill_type == bill_type,
-                                     models.Bills.bill_number == bill_num))
-    bill_id = s.query(models.Bills.id).filter(q.exists()).first()
-    if not bill_id:
+                                     models.Bills.bill_number == bill_num)).first()
+    #bill_id = s.query(models.Bills.id).filter(q.exists()).first()
+    if not q:
         create_bill(sub, thr_id)
-        bill_id = s.query(models.Bills.id).filter(q.exists()).first().id
+        q2 = s.query(models.Bills).filter(and_(models.Bills.bill_type == bill_type,
+                                     models.Bills.bill_number == bill_num)).first()
+        bill_id = q2.id
         return bill_id
 
-    if bill_id != null:
-        return bill_id.id
+    if q != null:
+        return q.id
 
 
 def create_user(usr_id, usr_name):
@@ -69,15 +71,14 @@ def find_user(usr_id, usr_name):
     s = Session()
     s.close_all()
 
-    q = s.query(models.Redditors).filter(models.Redditors.user_id == usr_id)
-    user_id = s.query(models.Redditors.id).filter(q.exists()).first()
-    if not user_id:
+    q = s.query(models.Redditors).filter(models.Redditors.user_api == usr_id).first()
+    if not q:
         track_users(0, usr_name, usr_id)
-        user_id = s.query(models.Redditors.id).filter(q.exists()).first()
+        user_id = s.query(models.Redditors).filter(models.Redditors.user_api == usr_id).first()
         return user_id.id
 
-    if user_id != 0:
-        return user_id.id
+    if q != 0:
+        return q.id
 
 
 def create_thread(sub, thr_id):
@@ -151,5 +152,12 @@ def update_bill(bill_id, new_thr):
     s.commit()
     s.close_all()
 
-
-
+def update_thread(thr_api, mode, vt_log):
+    s = Session()
+    thr_id = find_thread(thr_api)
+    q = s.query(models.Threads).filter(models.Threads.id == thr_id).first()
+    q.locked = mode
+    q.votes_logged = vt_log
+    q.locked_on = datetime.datetime.utcnow().isoformat()
+    s.commit()
+    s.close_all()

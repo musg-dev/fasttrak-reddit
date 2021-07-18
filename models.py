@@ -10,6 +10,7 @@ class Threads(Base):
     timestamp = Column(DateTime)
     thread_id = Column(String)
     bill_id = Column(Integer)
+    comm_id = Column(Integer)
     locked = Column(Boolean)
     locked_on = Column(DateTime)
     votes_logged = Column(Boolean)

@@ -76,3 +76,35 @@ def parse_bill_num(title, bill_type):
         raw_bill_num = title[3:6]
         bill_num = [int(word) for word in raw_bill_num.split() if word.isdigit()]
         return bill_num
+
+def parse_sub(sub_name):
+    if sub_name == "ModelUSHouse":
+        return 1
+    elif sub_name == "ModelUSSenate":
+        return 2
+    elif sub_name == "ModelSenateJudiciCom":
+        return 3
+    elif sub_name == "ModelSenateEnviroCom":
+        return 4
+    elif sub_name == "ModelSenateFinanceCom":
+        return 5
+    elif sub_name == "ModelSenateFACom":
+        return 6
+    elif sub_name == "ModelUSHouseFACom":
+        return 7
+    elif sub_name == "ModelUSHouseBudgetCom":
+        return 8
+    elif sub_name == "ModelUSHouseESTCom":
+        return 9
+    elif sub_name == "ModelUSHouseELECom":
+        return 10
+    elif sub_name == "ModelUSHouseGOIII":
+        return 11
+    elif sub_name == "ModelUSHouseJudicial":
+        return 12
+    elif sub_name == "ModelUSHouseRulesCom":
+        return 13
+    elif sub_name == "ModelUSHouseIntelCom":
+        return 14
+    else:
+        return 0
