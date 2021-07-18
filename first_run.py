@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from bot import config
-from . import models
+import config
+import models
 
 engine = create_engine(config.DATABASE_URI)
 Session = sessionmaker(bind=engine)

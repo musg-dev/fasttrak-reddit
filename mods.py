@@ -1,4 +1,4 @@
-from bot import config
+import config
 
 
 def list_mods(reddit):

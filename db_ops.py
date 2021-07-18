@@ -1,10 +1,13 @@
 import datetime
-from . import bot_parser
-from bot import config
+
+from sqlalchemy.sql.expression import null
+from sqlalchemy.sql.sqltypes import DateTime
+import bot_parser
+import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy import and_
-from . import models
+import models
 
 
 engine = create_engine(config.DATABASE_URI)
@@ -25,11 +28,11 @@ def create_bill(sub, thr_id):
 
     s.add(bill_full)
     s.commit()
-    sub.reply("Thread is enabled.")
+    sub.reply("Bill has been created.")
     s.close_all()
 
 
-def find_bill(sub):
+def find_bill(sub, thr_id):
     s = Session()
     s.close_all()
     bill_type = bot_parser.parse_title(sub.title)
@@ -37,12 +40,14 @@ def find_bill(sub):
 
     q = s.query(models.Bills).filter(and_(models.Bills.bill_type == bill_type,
                                      models.Bills.bill_number == bill_num))
-    bill_id = s.query(models.Bills.id).filter(q.exists()).first().id
-
-    if bill_id != 0:
+    bill_id = s.query(models.Bills.id).filter(q.exists()).first()
+    if not bill_id:
+        create_bill(sub, thr_id)
+        bill_id = s.query(models.Bills.id).filter(q.exists()).first().id
         return bill_id
-    else:
-        return 0
+
+    if bill_id != null:
+        return bill_id.id
 
 
 def create_user(usr_id, usr_name):
@@ -60,22 +65,24 @@ def create_user(usr_id, usr_name):
     s.close_all()
 
 
-def find_user(user_api):
+def find_user(usr_id, usr_name):
     s = Session()
     s.close_all()
 
-    q = s.query(models.Redditors).filter(models.Redditors.user_api == user_api)
-    user_id = s.query(models.Redditors.id).filter(q.exists()).first().id
+    q = s.query(models.Redditors).filter(models.Redditors.user_id == usr_id)
+    user_id = s.query(models.Redditors.id).filter(q.exists()).first()
+    if not user_id:
+        track_users(0, usr_name, usr_id)
+        user_id = s.query(models.Redditors.id).filter(q.exists()).first()
+        return user_id.id
 
     if user_id != 0:
-        return user_id
-    else:
-        return 0
+        return user_id.id
 
 
 def create_thread(sub, thr_id):
     s = Session()
-    bill_id = find_bill(sub)
+    bill_id = find_bill(sub, thr_id)
 
     thread_full = models.Threads(
         timestamp=datetime.datetime.utcnow().isoformat(),
@@ -92,12 +99,12 @@ def find_thread(thr_id):
     s = Session()
     s.close_all()
     q = s.query(models.Threads).filter(models.Threads.thread_id == thr_id)
-    thread_id = s.query(models.Threads).filter(q.exists()).first().id
-
-    if thread_id != 0:
-        return thread_id
-    else:
+    thread_id = s.query(models.Threads).filter(q.exists()).first()
+    if not thread_id:
         return 0
+
+    if thread_id != null:
+        return thread_id.id
 
 
 def create_vote(uid, bid, tid, vote):
@@ -118,11 +125,12 @@ def create_vote(uid, bid, tid, vote):
 
 def track_thread(flag, sub, thr_id):
     if flag == 0:
-        create_bill(sub, thr_id)
+        old_bill = find_bill(sub, thr_id)
         create_thread(sub, thr_id)
+        update_bill(old_bill, thr_id)
     if flag == 1:
         if find_thread(thr_id) == 0:
-            create_thread(thr_id)
+            create_thread(sub, thr_id)
         else:
             return 0
 
@@ -134,3 +142,14 @@ def track_users(flag, user, user_api):
         return find_user(user_api)
     else:
         return 0
+
+def update_bill(bill_id, new_thr):
+    s = Session()
+    q = s.query(models.Bills).filter(models.Bills.id == bill_id).first()
+    q.last_seen = datetime.datetime.utcnow().isoformat()
+    q.last_seen_thread = new_thr
+    s.commit()
+    s.close_all()
+
+
+

@@ -1,5 +1,4 @@
-from bot import config
-from . import router, mods
+import router, mods, config
 
 
 def sub_scan(r):

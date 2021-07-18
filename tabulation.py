@@ -1,11 +1,11 @@
 import emoji
 from sentry_sdk import capture_message
 import datetime
-from . import bot_parser
-from bot import config
+import bot_parser
+import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from . import db_ops
+import db_ops
 
 
 engine = create_engine(config.DATABASE_URI)
@@ -24,11 +24,9 @@ def tabulate_votes(submission, thread_id):
     submission.comments.replace_more(limit=None)
     all_comments = submission.comments.list()
     for i in all_comments:
-        if db_ops.find_user(i.author.id) == 0:
-            db_ops.track_users(0, i.author.name, i.author.id)
-        bid = db_ops.find_bill(submission)
+        bid = db_ops.find_bill(submission, submission.id)
         tid = db_ops.find_thread(submission.id)
-        uid = db_ops.find_user(i.author.id)
+        uid = db_ops.find_user(i.author.id, i.author.name)
         if bot_parser.parse_vote(i.body, i.author.name) == 1:
             db_ops.create_vote(uid, bid, tid, 1)
             aye = aye + 1

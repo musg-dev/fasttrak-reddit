@@ -1,9 +1,9 @@
+import first_run
+import scanner
 import sentry_sdk
 import os
 import praw
 import config
-import db
-import reddit
 
 sentry_sdk.init(
     config.SENTRY_URL,
@@ -23,10 +23,10 @@ def reddit_bot():
                         password=config.PASSWORD,
                         user_agent=config.USER_AGENT)
     print("Online with the Reddit API")
-    reddit.sub_scan(r_api)
+    scanner.sub_scan(r_api)
 
 
 if os.getenv("FT_FIRSTRUN") == "1":
-    db.db_kickstart()
+    first_run.db_kickstart()
 else:
     reddit_bot()

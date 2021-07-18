@@ -15,7 +15,7 @@ MOD_SUB = "MUSGFastTRAK"  # Sub to which draw the list of authorized users.
 
 if os.getenv("FT_DEVEL") == "1":
     WATCH_SUBS = "MUSGFastTRAKSandbox"
-    DATABASE_URI = 'postgresql+psycopg2://fasttrak:password@localhost:5432/ft_devel'
+    DATABASE_URI = 'postgresql://fasttrak:password@127.0.0.1:5432/ft_devel'
 else:
     WATCH_SUBS = "ModelUSHouseFACom+ModelUSHouseBudgetCom+ModelUSHouseESTCom+" \
                  "ModelUSHouseELECom+ModelUSHouseGOIII+ModelUSHouseJudicial+ModelUSHouseRulesCom+" \
