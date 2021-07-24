@@ -4,7 +4,7 @@ from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.sqltypes import DateTime
 import bot_parser
 import config
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import clear_mappers, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy import and_
 import models
@@ -18,12 +18,14 @@ def create_bill(sub, thr_id):
     s = Session()
     bill_type = bot_parser.parse_title(sub.title)
     bill_num = bot_parser.parse_bill_num(sub.title, bill_type)[0]
+    comm_id = bot_parser.parse_sub(sub.subreddit.display_name)
 
     bill_full = models.Bills(
         bill_type=bill_type,
         bill_number=bill_num,
         last_seen=datetime.datetime.utcnow().isoformat(),
-        last_seen_thread=thr_id
+        last_seen_thread=thr_id,
+        curr_comm=comm_id
     )
 
     s.add(bill_full)
@@ -84,11 +86,13 @@ def find_user(usr_id, usr_name):
 def create_thread(sub, thr_id):
     s = Session()
     bill_id = find_bill(sub, thr_id)
+    comm_id = bot_parser.parse_sub(sub.subreddit.display_name)
 
     thread_full = models.Threads(
         timestamp=datetime.datetime.utcnow().isoformat(),
         thread_id=thr_id,
-        bill_id=bill_id
+        bill_id=bill_id,
+        comm_id=comm_id
     )
 
     s.add(thread_full)
@@ -127,8 +131,9 @@ def create_vote(uid, bid, tid, vote):
 def track_thread(flag, sub, thr_id):
     if flag == 0:
         old_bill = find_bill(sub, thr_id)
+        comm_id = bot_parser.parse_sub(sub.subreddit.display_name)
         create_thread(sub, thr_id)
-        update_bill(old_bill, thr_id)
+        update_bill(old_bill, thr_id, comm_id)
     if flag == 1:
         if find_thread(thr_id) == 0:
             create_thread(sub, thr_id)
@@ -144,11 +149,12 @@ def track_users(flag, user, user_api):
     else:
         return 0
 
-def update_bill(bill_id, new_thr):
+def update_bill(bill_id, new_thr, new_comm):
     s = Session()
     q = s.query(models.Bills).filter(models.Bills.id == bill_id).first()
     q.last_seen = datetime.datetime.utcnow().isoformat()
     q.last_seen_thread = new_thr
+    q.curr_comm = new_comm
     s.commit()
     s.close_all()
 

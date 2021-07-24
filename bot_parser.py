@@ -106,5 +106,7 @@ def parse_sub(sub_name):
         return 13
     elif sub_name == "ModelUSHouseIntelCom":
         return 14
+    elif sub_name == "MUSGFastTRAKSandbox":
+        return 15
     else:
         return 0

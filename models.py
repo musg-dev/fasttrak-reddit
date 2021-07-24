@@ -52,6 +52,7 @@ class Bills(Base):
     id = Column(Integer, primary_key=True)
     bill_type = Column(Integer)
     bill_number = Column(Integer)
+    curr_comm = Column(Integer)
     last_seen = Column(DateTime)
     last_seen_thread = Column(String)
 
