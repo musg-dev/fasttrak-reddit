@@ -1,5 +1,4 @@
 import datetime
-
 from sqlalchemy.sql.expression import null
 from sqlalchemy.sql.sqltypes import DateTime
 import bot_parser
@@ -8,6 +7,7 @@ from sqlalchemy.orm import clear_mappers, sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy import and_
 import models
+from sentry_sdk import capture_message
 
 
 engine = create_engine(config.DATABASE_URI)
@@ -30,7 +30,8 @@ def create_bill(sub, thr_id):
 
     s.add(bill_full)
     s.commit()
-    print("Bill Created: " + str(bill_type) + " :: " + str(bill_num))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Bill // [INFO] Bill Created. Bill Type: " + str(bill_type) + ", Bill Number: " + str(bill_num))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Bill // [INFO] Bill Created. Bill Type: " + str(bill_type) + ", Bill Number: " + str(bill_num))
     sub.reply("Bill has been created.")
     s.close_all()
 
@@ -49,11 +50,13 @@ def find_bill(sub, thr_id):
         q2 = s.query(models.Bills).filter(and_(models.Bills.bill_type == bill_type,
                                      models.Bills.bill_number == bill_num)).first()
         bill_id = q2.id
-        print("Found Bill: " + str(bill_id))
+        print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Bill // [INFO] Found Bill: " + str(bill_id))
+        capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Bill // [INFO] Found Bill: " + str(bill_id))
         return bill_id
 
     if q != null:
-        print("Found Bill: " + str(q.id))
+        print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Bill // [INFO] Found Bill: " + str(q.id))
+        capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Bill // [INFO] Found Bill: " + str(q.id))
         return q.id
 
 
@@ -67,7 +70,8 @@ def create_user(usr_id, usr_name):
         last_seen=datetime.datetime.utcnow().isoformat()
     )
 
-    print("Adding User: " + str(usr_id) + ", " + str(usr_name))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_User // [INFO] Creating User. User API: " + str(usr_id) + ", Username: " + str(usr_name))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_User // [INFO] Creating User. User API: " + str(usr_id) + ", Username: " + str(usr_name))
     s.add(usr_full)
     s.commit()
     s.close_all()
@@ -81,11 +85,13 @@ def find_user(usr_id, usr_name):
     if not q:
         track_users(0, usr_name, usr_id)
         user_id = s.query(models.Redditors).filter(models.Redditors.user_api == usr_id).first()
-        print("Found User: " + str(user_id.id))
+        print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_User // [INFO] Found User: " + str(user_id.id))
+        capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_User // [INFO] Found User: " + str(user_id.id))
         return user_id.id
 
     if q != 0:
-        print("Found User: " + str(q.id))
+        print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_User // [INFO] Found User: " + str(q.id))
+        capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_User // [INFO] Found User: " + str(q.id))
         return q.id
 
 
@@ -101,7 +107,8 @@ def create_thread(sub, thr_id):
         comm_id=comm_id
     )
 
-    print("Creating Thread: " + str(thr_id) + ", " + str(bill_id) + ", " + str(comm_id))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Thread // [INFO] Creating Thread. Thread ID: " + str(thr_id) + ", Bill ID: " + str(bill_id) + ", Committee ID: " + str(comm_id))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Thread // [INFO] Creating Thread. Thread ID: " + str(thr_id) + ", Bill ID: " + str(bill_id) + ", Committee ID: " + str(comm_id))
     s.add(thread_full)
     s.commit()
     s.close_all()
@@ -116,7 +123,8 @@ def find_thread(thr_id):
         return 0
 
     if thread_id != null:
-        print("Found Thread: " + str(thread_id.id))
+        print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Thread // [INFO] Found Thread: " + str(thread_id.id))
+        capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Find_Thread // [INFO] Found Thread: " + str(thread_id.id))
         return thread_id.id
 
 
@@ -131,7 +139,8 @@ def create_vote(uid, bid, tid, vote):
         vote=vote
     )
 
-    print("Adding Vote: " + str(uid) + ", " + str(bid) + ", " + str(tid) + ", " + str(vote))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Vote // [INFO] Recording Vote. User ID: " + str(uid) + ", Bill ID: " + str(bid) + ", Thread ID: " + str(tid) + ", Vote: " + str(vote))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Create_Vote // [INFO] Recording Vote. User ID: " + str(uid) + ", Bill ID: " + str(bid) + ", Thread ID: " + str(tid) + ", Vote: " + str(vote))
     s.add(vote_full)
     s.commit()
     s.close_all()
@@ -164,7 +173,8 @@ def update_bill(bill_id, new_thr, new_comm):
     q.last_seen = datetime.datetime.utcnow().isoformat()
     q.last_seen_thread = new_thr
     q.curr_comm = new_comm
-    print("Updating Bill: " + str(bill_id) + ", " + str(new_thr) + ", " + str(new_comm))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Update_Bill // [INFO] Updating Bill. Bill ID: " + str(bill_id) + ", New Thread: " + str(new_thr) + ", New Committee: " + str(new_comm))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Update_Bill // [INFO] Updating Bill. Bill ID: " + str(bill_id) + ", New Thread: " + str(new_thr) + ", New Committee: " + str(new_comm))
     s.commit()
     s.close_all()
 
@@ -175,6 +185,7 @@ def update_thread(thr_api, mode, vt_log):
     q.locked = mode
     q.votes_logged = vt_log
     q.locked_on = datetime.datetime.utcnow().isoformat()
-    print("Updating Thread: " + str(thr_api) + ", " + str(mode) + ", " + str(vt_log))
+    print(datetime.datetime.utcnow().isoformat() + " Db_Ops::Update_Thread // [INFO] Updating Thread. Thread API ID: " + str(thr_api) + ", Locked: " + str(mode) + ", Votes Logged: " + str(vt_log))
+    capture_message(datetime.datetime.utcnow().isoformat() + " Db_Ops::Update_Thread // [INFO] Updating Thread. Thread API ID: " + str(thr_api) + ", Locked: " + str(mode) + ", Votes Logged: " + str(vt_log))
     s.commit()
     s.close_all()

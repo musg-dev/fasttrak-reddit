@@ -4,6 +4,7 @@ import sentry_sdk
 import os
 import praw
 import config
+import datetime
 
 sentry_sdk.init(
     config.SENTRY_URL,
@@ -16,13 +17,13 @@ sentry_sdk.init(
 
 
 def reddit_bot():
-    print("The FastTRAK Reddit Interface is initializing, stand by.")
+    print(datetime.datetime.utcnow().isoformat() + " Bot::Reddit_Bot // [INFO] The FastTRAK Reddit Interface is initializing, stand by.")
     r_api = praw.Reddit(client_id=config.CLIENT_ID,
                         client_secret=config.CLIENT_SECRET,
                         username=config.USERNAME,
                         password=config.PASSWORD,
                         user_agent=config.USER_AGENT)
-    print("Online with the Reddit API")
+    print(datetime.datetime.utcnow().isoformat() + " Bot::Reddit_Bot // [INFO] Online with the Reddit API")
     scanner.sub_scan(r_api)
 
 
