@@ -38,11 +38,10 @@ def tabulate_votes(submission, thread_id):
             db_ops.create_vote(uid, bid, tid, 2)
             abst = abst + 1
         elif bot_parser.parse_vote(i.body, i.author.name) == 10:
-            print(" Plugins::Secure // [INFO] Ignoring Trigger.")
+            print(datetime.datetime.utcnow().isoformat() + ": Tabulation::Tabulate_Votes // [INFO] Ignoring Trigger.")
         else:
-            print(datetime.datetime.utcnow().isoformat() + " Plugins::Secure // [WARN] Parser Mismatch (" + i.id + ").")
-            capture_message(datetime.datetime.utcnow().isoformat() + " Plugins::Secure // [WARN] Parser Mismatch ("
-                            + i.id + ").")
+            print(datetime.datetime.utcnow().isoformat() + " Tabulation::Tabulate_Votes // [WARN] Parser Mismatch on thread ID: " + i.id + ".")
+            capture_message(datetime.datetime.utcnow().isoformat() + " Tabulation::Tabulate_Votes // [WARN] Parser Mismatch on thread ID: "+ i.id + ".")
             alerts = alerts + 1
     count = [aye], [nay], [abst], [alerts]
     return count
@@ -55,13 +54,15 @@ def secure_thread(submission, count):
     alerts = count[3]
     if alerts == [0]:
         db_ops.update_thread(submission.id, True, True)
-        submission.reply("THREAD IS SECURED! \n\n \n\n Ayes: " + str(aye) + " \n\n Nays: " + str(nay)
-                         + " \n\n Abstain: " + str(abst))
+        submission.reply("The thread has been secured. \n\n \n\n Ayes: " + str(aye) 
+                                                        + " \n\n Nays: " + str(nay)
+                                                        + " \n\n Abstain: " + str(abst))
     if alerts != [0]:
         db_ops.update_thread(submission.id, True, True)
         submission.reply(emoji.emojize(":biohazard:") + " I HAVE ALERTS! CHECK SENTRY! " + emoji.emojize(":biohazard:")
-                         + " \n\n \n\n \n\n \n\n THREAD IS SECURED WITH " + emoji.emojize(":biohazard:") + " "
-                         + str(alerts) + " ALERTS! \n\n \n\n Ayes: " + str(aye) + " \n\n Nays: " + str(nay)
-                         + " \n\n Abstain: " + str(abst))
+                         + " \n\n \n\n \n\n \n\n The thread has been secured with " + " " + str(alerts) 
+                                             + " alerts. \n\n \n\n Ayes: " + str(aye) 
+                                                          + " \n\n Nays: " + str(nay)
+                                                          + " \n\n Abstain: " + str(abst))
     submission.mod.lock()
     s.close_all()
